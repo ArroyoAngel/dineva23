@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { 
     db,
-    addDoc, setDoc, doc, getDocs, collection, deleteDoc
+    addDoc, setDoc, doc, getDocs, collection, deleteDoc,
+    storage, ref, uploadBytes, getDownloadURL
  } from '../../../helpers/firebase.config';
 
 import { QuerySnapshot } from 'firebase/firestore';
@@ -33,5 +34,12 @@ export class UserService {
 
     public async deleteUser(uid: string): Promise<void> {
         await deleteDoc(doc(db, 'users', uid))
+    }
+    
+    public async uploadPhotoUrl(uid: string, file: Express.Multer.File): Promise<string> {
+        const storageRef = ref(storage, `users/photoProfile/${uid}/${file.originalname}`);
+        await uploadBytes(storageRef, file.buffer);
+        const url = await getDownloadURL(storageRef);
+        return url;
     }
 }

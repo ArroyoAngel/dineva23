@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { 
   getAuth,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification,
@@ -30,7 +30,7 @@ export const provider = {
 }
 export { 
   setDoc, collection, doc, getDoc, getDocs, addDoc, onSnapshot, query, where, deleteDoc,
-  getStorage,
+  ref, uploadBytes, getDownloadURL,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, confirmPasswordReset, signInWithPopup, sendEmailVerification,
  };
 

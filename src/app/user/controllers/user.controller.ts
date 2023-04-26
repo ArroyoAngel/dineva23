@@ -1,9 +1,11 @@
 import { 
     Controller,
     Post, Get, Put, Delete,
-    Body, Param, Req,
+    Body, Param, Req, UploadedFile,
+    UseInterceptors,
     UseGuards    
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../services/user.service'
 import { AuthTokenGuard } from '../../auth/guards/auth-token/auth-token.guard'
 import { adminAuth } from '../../../helpers/firebase.config.admin';
@@ -11,7 +13,7 @@ import httpResponse from '../../../helpers/http.response'
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier"
 import { AuthRoleGuard } from 'src/app/auth/guards/auth-role/auth-role.guard';
 
-@UseGuards(new AuthRoleGuard('client'))
+@UseGuards(new AuthRoleGuard('admin'))
 @UseGuards(AuthTokenGuard)
 @Controller('user')
 export class UserController {
@@ -56,5 +58,15 @@ export class UserController {
         await this.service.deleteUser(id);
         
         return httpResponse(200, 'item deleted!', { id }, owner);
+    }
+
+    @Post('upload/:id')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadImage(@Req() request, @Param('id') id: string, @UploadedFile() file: Express.Multer.File){
+        const owner = await this.getRequestOwner(request);
+
+        const url = await this.service.uploadPhotoUrl(id, file);
+
+        return httpResponse(200, 'image uploaded!', { url }, owner);
     }
 }
