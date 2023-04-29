@@ -14,7 +14,6 @@ export const AccountFirebase: FirestoreDataConverter<Account> = {
         options: SnapshotOptions
     ): Account {
         const data = snapshot.data(options);
-        const { creationTime, lastSignInTime } = data.metadata;
         return {
             id: snapshot.id,
             email: data.email,

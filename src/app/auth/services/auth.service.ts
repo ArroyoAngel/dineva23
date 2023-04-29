@@ -7,9 +7,7 @@ export class AuthService {
     constructor() {}
 
     async login(email: string, password: string): Promise<any> {
-        console.log(email)
         const session = await signInWithEmailAndPassword(auth, email, password)
-        console.log(session)
         return session;
     }
 

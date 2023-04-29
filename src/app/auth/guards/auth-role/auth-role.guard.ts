@@ -13,7 +13,7 @@ export class AuthRoleGuard<Roles> implements CanActivate {
     const token = request.headers["authorization"]?.split(' ')[1];
     try {
       const owner = await adminAuth.verifyIdToken(token);
-      const unauthorized = owner["role"] !== this.role
+      const unauthorized = owner["role"] !== this.role;
       if (unauthorized){
         throw new ForbiddenException('Invalid role');
       }

@@ -13,10 +13,10 @@ export default function (status: number, message: string, data: object, owner: D
 function get_metadata (owner: DecodedIdToken) {
     return {
         date: new Date(),
-        owner: {
+        owner: owner? {
             uid: owner.user_id,
             expireToken: owner.exp,
-            email: owner.email,
-        }
+            email: owner.email
+        }: {}
     }
 }

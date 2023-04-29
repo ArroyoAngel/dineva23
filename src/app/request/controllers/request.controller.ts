@@ -1,25 +1,29 @@
 import { 
     Controller,
     Post, Get, Put, Delete,
-    Body, Param, Req, UploadedFile,
+    Body, Param, Req,
+    UseGuards,
     UseInterceptors,
-    UseGuards    
+    UploadedFile
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { UserService } from '../services/user.service'
+import { RequestService } from '../services/request.service';
 import { adminAuth } from '../../../helpers/firebase.config.admin';
 
-import httpResponse from '../../../helpers/http.response';
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { AuthRoleGuard } from 'src/app/auth/guards/auth-role/auth-role.guard';
 import { AuthTokenGuard } from '../../auth/guards/auth-token/auth-token.guard';
+import { RequestDto } from '../domain/RequestDto';
+import httpResponse from '../../../helpers/http.response';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(new AuthRoleGuard('admin'))
 @UseGuards(AuthTokenGuard)
-@Controller('user')
-export class UserController {
-    constructor(private service: UserService){}
-    
+@Controller('request')
+export class RequestController {
+    constructor(
+        private service: RequestService
+    ){}
+
     protected async getRequestOwner(request): Promise<DecodedIdToken>{
         const token = request.headers["authorization"]?.split(' ')[1];
         const owner = await adminAuth.verifyIdToken(token)
@@ -27,46 +31,58 @@ export class UserController {
     }
 
     @Post()
-    async createUser(@Req() request, @Body() payload){
+    async createRequest(@Req() request, @Body() payload: RequestDto){
         const owner = await this.getRequestOwner(request);
 
-        const data = await this.service.createUser(payload)  ; 
-        
+        const data = await this.service.createRequest(payload);
+
         return httpResponse(200, 'item created!', data, owner);
     }
+
     @Get()
-    async getUsers(@Req() request){
+    async getRequest(@Req() request, ){
         const owner = await this.getRequestOwner(request);
 
-        const data = await this.service.getUsers();
+        const data = await this.service.getRequests();
 
         return httpResponse(200, 'Ok!', data, owner);
     }
 
     @Put(':id')
-    async updateUser(@Req() request, @Param('id') id: string, @Body() payload){
+    async updateRequest(@Req() request, @Body() payload: RequestDto, @Param('id') id: string){
         const owner = await this.getRequestOwner(request);
-
-        await this.service.updateUser(id, payload)
+        
+        await this.service.updateRequest(id, payload);
 
         return httpResponse(200, 'item updated!', { id, ...payload }, owner);
     }
 
     @Delete(':id')
-    async deleteUser(@Req() request, @Param('id') id: string){
+    async deleteRequest(@Req() request, @Param('id') id: string){
         const owner = await this.getRequestOwner(request);
 
-        await this.service.deleteUser(id);
-        
+        await this.service.deleteRequest(id);
+
         return httpResponse(200, 'item deleted!', { id }, owner);
     }
 
-    @Post('upload/:id')
+    @Post('upload/image/:id')
     @UseInterceptors(FileInterceptor('file'))
     async uploadImage(@Req() request, @Param('id') id: string, @UploadedFile() file: Express.Multer.File){
+
         const owner = await this.getRequestOwner(request);
 
-        const url = await this.service.uploadPhotoUrl(id, file);
+        const url = await this.service.uploadImageUrl(id, file);
+
+        return httpResponse(200, 'image uploaded!', { url }, owner);
+    }
+
+    @Post('upload/cardboard/:id')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadCardboard(@Req() request, @Param('id') id: string, @UploadedFile() file: Express.Multer.File){
+        const owner = await this.getRequestOwner(request);
+
+        const url = await this.service.uploadCardboardUrl(id, file);
 
         return httpResponse(200, 'image uploaded!', { url }, owner);
     }

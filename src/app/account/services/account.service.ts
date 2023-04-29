@@ -46,15 +46,14 @@ export class AccountService {
     }
 
     public async deleteAccount(uid: string): Promise<void> {
-        await deleteDoc(doc(db, 'coleccion1', uid))
+        await deleteDoc(doc(db, 'accounts', uid))
     }
 
-    public async enabledAccount(disabled: boolean, uid: string){
+    public async disableAccount(disabled: boolean, uid: string): Promise<void>{
         await admin.auth().updateUser(uid, { disabled })
     }
 
     public async resetPassword(email: string): Promise<void>{
-        console.log(email)
         await sendPasswordResetEmail(auth, email);
     }
 }
